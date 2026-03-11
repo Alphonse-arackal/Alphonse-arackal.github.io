@@ -5,7 +5,7 @@
   "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icon-192.png",
@@ -19,5 +19,14 @@
     }
   ],
   "description": "casual tic tac toe",
-  "id": "casual oxo"
+  "id": "casual oxo",
+  "display_override": [
+    "fullscreen",
+    "window-controls-overlay"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "games"
+  ]
 }
