@@ -1,11 +1,11 @@
 {
-  "name": "My HTML Game",
-  "short_name": "MyGame",
+  "name": "tap war",
+  "short_name": "casual oxo",
   "start_url": "index.html",
   "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "landscape",
+  "orientation": "potrait",
   "icons": [
     {
       "src": "icon-192.png",
