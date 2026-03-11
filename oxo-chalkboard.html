@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OXO — Chalk Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Caveat+Brush&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board:    #1a2a1a;
+    --board2:   #162316;
+    --chalk-o:  #f9d28a;
+    --chalk-x:  #a8e6cf;
+    --chalk-w:  #ff8fa3;
+    --chalk:    #e8e0d0;
+    --chalk-dim:#7a8a7a;
+    --wood:     #5c3d1e;
+    --wood2:    #3d2610;
+    --score-bg: #0f1f0f;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html, body {
+    width:100%; height:100%; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--wood2);
+    font-family: 'Caveat', cursive;
+  }
+
+  /* Wooden frame */
+  .frame {
+    position:relative;
+    background: var(--wood);
+    padding: 18px 20px 22px;
+    border-radius: 6px;
+    box-shadow:
+      inset 0 2px 4px rgba(255,200,100,0.15),
+      inset 0 -2px 4px rgba(0,0,0,0.3),
+      0 8px 40px rgba(0,0,0,0.7),
+      0 2px 6px rgba(0,0,0,0.5);
+    /* Wood grain */
+    background-image:
+      repeating-linear-gradient(
+        92deg,
+        transparent 0px, transparent 8px,
+        rgba(0,0,0,0.04) 8px, rgba(0,0,0,0.04) 9px
+      ),
+      repeating-linear-gradient(
+        180deg,
+        rgba(255,180,60,0.04) 0px, rgba(255,180,60,0.04) 40px,
+        transparent 40px, transparent 80px
+      );
+    background-color: var(--wood);
+  }
+
+  /* Metal corner bolts */
+  .frame::before, .frame::after,
+  .bolt-tl, .bolt-tr, .bolt-bl, .bolt-br {
+    content:''; position:absolute;
+    width:14px; height:14px; border-radius:50%;
+    background: radial-gradient(circle at 35% 35%, #bbb 0%, #666 50%, #333 100%);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .frame::before { top:8px; left:8px; }
+  .frame::after  { top:8px; right:8px; }
+  .bolt-bl       { bottom:8px; left:8px; }
+  .bolt-br       { bottom:8px; right:8px; }
+
+  /* Chalkboard surface */
+  .board-surface {
+    position:relative;
+    background: var(--board);
+    border-radius:3px;
+    padding: 20px 16px 16px;
+    box-shadow:
+      inset 0 0 30px rgba(0,0,0,0.4),
+      inset 0 0 60px rgba(0,0,0,0.2);
+    /* Chalk dust texture via noise-ish gradient */
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    overflow:hidden;
+    min-width: min(380px, 92vw);
+  }
+
+  /* Chalk dust smudges */
+  .board-surface::before {
+    content:''; position:absolute;
+    bottom:10px; left:5%; right:5%; height:14px;
+    background: radial-gradient(ellipse, rgba(200,220,200,0.06) 0%, transparent 70%);
+    border-radius:50%;
+  }
+
+  /* Title */
+  .title {
+    text-align:center; margin-bottom:14px; position:relative;
+  }
+
+  .title h1 {
+    font-family: 'Caveat Brush', cursive;
+    font-size: clamp(2.4rem, 7vw, 3.2rem);
+    color: var(--chalk);
+    letter-spacing:0.12em;
+    text-shadow:
+      1px 1px 0 rgba(0,0,0,0.3),
+      0 0 20px rgba(232,224,208,0.1);
+    line-height:1;
+  }
+
+  .title h1 .o { color: var(--chalk-o); text-shadow: 0 0 16px rgba(249,210,138,0.4); }
+  .title h1 .x { color: var(--chalk-x); text-shadow: 0 0 16px rgba(168,230,207,0.4); }
+
+  .title .subtitle {
+    font-size:0.95rem; color:var(--chalk-dim);
+    letter-spacing:0.05em; margin-top:2px;
+  }
+
+  /* Scoreboard — like a tally on a chalkboard */
+  .score-row {
+    display:flex; gap:0; align-items:stretch; margin-bottom:14px;
+    border:1.5px solid rgba(232,224,208,0.1); border-radius:4px; overflow:hidden;
+  }
+
+  .score-cell {
+    flex:1; text-align:center; padding:8px 6px;
+    border-right:1.5px solid rgba(232,224,208,0.1);
+  }
+
+  .score-cell:last-child { border-right:none; }
+
+  .score-label {
+    font-size:0.85rem; color:var(--chalk-dim); display:block; margin-bottom:2px;
+  }
+
+  .score-num {
+    font-family:'Caveat Brush', cursive;
+    font-size:2rem; line-height:1;
+    transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .score-cell.o-cell .score-num { color:var(--chalk-o); }
+  .score-cell.x-cell .score-num { color:var(--chalk-x); }
+  .score-cell.d-cell .score-num { color:var(--chalk-dim); }
+
+  .score-num.bump {
+    animation:bump 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes bump {
+    0%,100%{transform:scale(1)} 50%{transform:scale(1.5) rotate(-5deg)}
+  }
+
+  /* Turn indicator — chalk text at top of board */
+  .turn-row {
+    text-align:center; margin-bottom:12px; min-height:28px;
+    font-size:1.15rem; color:var(--chalk-dim);
+    transition:color 0.3s;
+  }
+
+  .turn-row .turn-name { font-weight:600; font-size:1.3rem; }
+  .turn-row.turn-o .turn-name { color:var(--chalk-o); }
+  .turn-row.turn-x .turn-name { color:var(--chalk-x); }
+  .turn-row.turn-end .turn-name { color:var(--chalk-w); }
+
+  /* The game grid */
+  .grid-wrap {
+    position:relative;
+    width:min(300px, 80vw); height:min(300px, 80vw);
+    margin:0 auto 14px;
+  }
+
+  /* Chalk grid lines — drawn as SVG for authentic look */
+  .grid-lines {
+    position:absolute; inset:0; pointer-events:none;
+  }
+
+  /* Cells */
+  .grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    width:100%; height:100%;
+    position:relative; z-index:2;
+  }
+
+  .cell {
+    cursor:pointer; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    transition:background 0.2s;
+  }
+
+  .cell::after {
+    content:''; position:absolute; inset:6px; border-radius:6px;
+    background:transparent; transition:background 0.15s;
+  }
+
+  .cell:hover:not(.taken)::after {
+    background:rgba(232,224,208,0.04);
+  }
+
+  .cell.taken { cursor:default; }
+
+  /* Preview ghost on hover */
+  .cell:hover:not(.taken) .ghost { opacity:0.18; }
+  .ghost {
+    position:absolute; width:60%; height:60%; opacity:0;
+    transition:opacity 0.15s; pointer-events:none; z-index:3;
+  }
+
+  /* Chalk marks — drawn with SVG stroke animations */
+  .chalk-mark {
+    position:absolute; width:68%; height:68%; z-index:4;
+    opacity:0; pointer-events:none;
+  }
+
+  .chalk-mark.show {
+    animation:chalkAppear 0.12s ease forwards;
+  }
+
+  @keyframes chalkAppear {
+    from { opacity:0; transform:scale(0.85); }
+    to   { opacity:1; transform:scale(1); }
+  }
+
+  /* O — circle with rough chalk stroke */
+  .mark-o svg circle {
+    fill:none;
+    stroke: var(--chalk-o);
+    stroke-width:9;
+    stroke-linecap:round;
+    stroke-dasharray:220 10;
+    stroke-dashoffset:220;
+    filter:url(#chalk-filter);
+  }
+
+  .mark-o.show svg circle {
+    animation:drawO 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+  }
+
+  @keyframes drawO {
+    to { stroke-dashoffset:0; }
+  }
+
+  /* X — two lines */
+  .mark-x svg line {
+    stroke:var(--chalk-x);
+    stroke-width:9; stroke-linecap:round;
+    stroke-dasharray:160; stroke-dashoffset:160;
+    filter:url(#chalk-filter);
+  }
+
+  .mark-x.show svg line:nth-child(1) {
+    animation:drawLine 0.28s ease-out 0s forwards;
+  }
+
+  .mark-x.show svg line:nth-child(2) {
+    animation:drawLine 0.28s ease-out 0.2s forwards;
+  }
+
+  @keyframes drawLine { to { stroke-dashoffset:0; } }
+
+  /* Win strike-through */
+  .win-overlay {
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+  }
+
+  .win-overlay svg line {
+    stroke:var(--chalk-w);
+    stroke-width:6; stroke-linecap:round;
+    stroke-dasharray:700; stroke-dashoffset:700;
+    filter:url(#chalk-filter);
+    animation:drawWin 0.55s ease-out 0.1s forwards;
+  }
+
+  @keyframes drawWin { to { stroke-dashoffset:0; } }
+
+  /* Result message */
+  .result {
+    text-align:center; min-height:34px;
+    font-family:'Caveat Brush', cursive;
+    font-size:clamp(1.2rem, 4vw, 1.6rem);
+    color:transparent;
+    transition:color 0.3s;
+    margin-bottom:12px;
+    letter-spacing:0.05em;
+  }
+
+  .result.o-win  { color:var(--chalk-o); }
+  .result.x-win  { color:var(--chalk-x); }
+  .result.draw   { color:var(--chalk-dim); }
+
+  /* Mode toggle */
+  .controls {
+    display:flex; flex-direction:column; gap:10px; align-items:center;
+  }
+
+  .mode-row {
+    display:flex; gap:0;
+    border:1.5px solid rgba(232,224,208,0.15); border-radius:4px; overflow:hidden;
+  }
+
+  .mode-btn {
+    font-family:'Caveat', cursive; font-size:1rem; font-weight:600;
+    letter-spacing:0.06em; padding:6px 18px;
+    border:none; background:transparent; color:var(--chalk-dim);
+    cursor:pointer; transition:all 0.2s;
+    border-right:1.5px solid rgba(232,224,208,0.15);
+  }
+
+  .mode-btn:last-child { border-right:none; }
+
+  .mode-btn.active {
+    background:rgba(168,230,207,0.1); color:var(--chalk-x);
+  }
+
+  .mode-btn:not(.active):hover {
+    background:rgba(232,224,208,0.05); color:var(--chalk);
+  }
+
+  .btn-row { display:flex; gap:10px; }
+
+  .btn {
+    font-family:'Caveat', cursive; font-size:1.05rem; font-weight:600;
+    letter-spacing:0.06em; padding:7px 20px;
+    border:1.5px solid rgba(232,224,208,0.15);
+    border-radius:4px; background:transparent;
+    color:var(--chalk-dim); cursor:pointer; transition:all 0.2s;
+  }
+
+  .btn:hover { background:rgba(232,224,208,0.06); color:var(--chalk); border-color:rgba(232,224,208,0.3); }
+  .btn.primary { color:var(--chalk-o); border-color:rgba(249,210,138,0.3); }
+  .btn.primary:hover { background:rgba(249,210,138,0.06); border-color:var(--chalk-o); }
+  .btn:active { transform:scale(0.96); }
+
+  /* Chalk dust particle burst on mark */
+  .dust {
+    position:absolute; pointer-events:none; z-index:10;
+  }
+
+  .dust span {
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:rgba(232,224,208,0.7);
+    animation:dustFly 0.6s ease-out forwards;
+    transform-origin:center;
+  }
+
+  @keyframes dustFly {
+    0%  { transform:translate(0,0) scale(1); opacity:0.8; }
+    100%{ transform:translate(var(--dx),var(--dy)) scale(0); opacity:0; }
+  }
+
+  .ai-dot {
+    display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--chalk-x); margin-left:6px; vertical-align:middle;
+    animation:aiPulse 0.7s ease-in-out infinite alternate;
+  }
+
+  @keyframes aiPulse { from{opacity:0.2} to{opacity:1} }
+</style>
+</head>
+<body>
+
+<!-- SVG filters for chalk texture -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="chalk-filter" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="frame">
+  <div class="bolt-bl"></div><div class="bolt-br"></div>
+  <div class="board-surface">
+
+    <div class="title">
+      <h1><span class="o">O</span> × <span class="x">X</span> × <span class="o">O</span></h1>
+      <div class="subtitle">noughts &amp; crosses</div>
+    </div>
+
+    <!-- Scores -->
+    <div class="score-row">
+      <div class="score-cell o-cell">
+        <span class="score-label">O  Noughts</span>
+        <span class="score-num" id="sO">0</span>
+      </div>
+      <div class="score-cell d-cell">
+        <span class="score-label">draws</span>
+        <span class="score-num" id="sD">0</span>
+      </div>
+      <div class="score-cell x-cell">
+        <span class="score-label">Crosses  X</span>
+        <span class="score-num" id="sX">0</span>
+      </div>
+    </div>
+
+    <!-- Turn -->
+    <div class="turn-row turn-o" id="turnRow">
+      <span class="turn-name" id="turnName">O</span>
+      <span id="turnSuffix">'s turn</span>
+      <span class="ai-dot" id="aiDot" style="display:none"></span>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid-wrap" id="gridWrap">
+      <!-- chalk grid lines -->
+      <svg class="grid-lines" viewBox="0 0 300 300" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;">
+        <g filter="url(#chalk-filter)" stroke="rgba(232,224,208,0.22)" stroke-width="2" stroke-linecap="round">
+          <!-- Vertical -->
+          <line x1="100" y1="8"   x2="100" y2="292"/>
+          <line x1="200" y1="8"   x2="200" y2="292"/>
+          <!-- Horizontal -->
+          <line x1="8"   y1="100" x2="292" y2="100"/>
+          <line x1="8"   y1="200" x2="292" y2="200"/>
+        </g>
+      </svg>
+
+      <div class="grid" id="grid"></div>
+      <div class="win-overlay" id="winOverlay"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result" id="resultMsg"></div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="mode-row">
+        <button class="mode-btn active" id="btn2p" onclick="setMode('2p')">✌ 2 Players</button>
+        <button class="mode-btn" id="btnAI" onclick="setMode('ai')">🤖 vs AI</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="nextRound()">New Round</button>
+        <button class="btn" onclick="resetAll()">Erase All</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let board    = Array(9).fill(null);
+let current  = 'O';
+let over     = false;
+let mode     = '2p';
+let scores   = {O:0,X:0,D:0};
+let ghostPlayer = 'O';
+
+const WINS = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+// Win line endpoints in the 300×300 viewBox
+const LINE_COORDS = [
+  [50,50,250,50],[50,150,250,150],[50,250,250,250],   // rows
+  [50,50,50,250],[150,50,150,250],[250,50,250,250],   // cols
+  [50,50,250,250],[250,50,50,250]                     // diags
+];
+
+// ── Build Grid ─────────────────────────────────────────────────────────────
+function buildGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for(let i=0;i<9;i++){
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.dataset.i = i;
+    cell.innerHTML = `
+      <div class="ghost" id="ghost-${i}">
+        <svg viewBox="0 0 90 90" width="100%" height="100%"></svg>
+      </div>
+      <div class="chalk-mark mark-o" id="mo-${i}">
+        <svg viewBox="0 0 90 90" width="100%" height="100%">
+          <circle cx="45" cy="45" r="28"/>
+        </svg>
+      </div>
+      <div class="chalk-mark mark-x" id="mx-${i}">
+        <svg viewBox="0 0 90 90" width="100%" height="100%">
+          <line x1="18" y1="18" x2="72" y2="72"/>
+          <line x1="72" y1="18" x2="18" y2="72"/>
+        </svg>
+      </div>`;
+    cell.addEventListener('click', ()=>onCell(i));
+    cell.addEventListener('mouseenter', ()=>showGhost(i));
+    cell.addEventListener('mouseleave', ()=>hideGhost(i));
+    g.appendChild(cell);
+  }
+  document.getElementById('winOverlay').innerHTML='';
+}
+
+// ── Ghost preview ───────────────────────────────────────────────────────────
+function showGhost(i){
+  if(over||board[i]) return;
+  if(mode==='ai'&&current==='X') return;
+  const g = document.getElementById(`ghost-${i}`);
+  const svg = g.querySelector('svg');
+  svg.innerHTML = current==='O'
+    ? `<circle cx="45" cy="45" r="28" fill="none" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--chalk-o').trim()}" stroke-width="8" stroke-linecap="round"/>`
+    : `<line x1="18" y1="18" x2="72" y2="72" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--chalk-x').trim()}" stroke-width="8" stroke-linecap="round"/>
+       <line x1="72" y1="18" x2="18" y2="72" stroke="${getComputedStyle(document.documentElement).getPropertyValue('--chalk-x').trim()}" stroke-width="8" stroke-linecap="round"/>`;
+  g.style.opacity = '0.18';
+}
+
+function hideGhost(i){
+  const g = document.getElementById(`ghost-${i}`);
+  if(g) g.style.opacity='0';
+}
+
+// ── Gameplay ────────────────────────────────────────────────────────────────
+function onCell(i){
+  if(over||board[i]) return;
+  if(mode==='ai'&&current==='X') return;
+  doMove(i);
+  if(!over && mode==='ai' && current==='X') scheduleAI();
+}
+
+function doMove(i){
+  board[i]=current;
+  placeMark(i,current);
+  spawnDust(i);
+  const win = findWin();
+  if(win){
+    endGame(current,win);
+  } else if(board.every(c=>c)){
+    endGame(null,null);
+  } else {
+    current = current==='O'?'X':'O';
+    updateTurn();
+  }
+}
+
+function placeMark(i,player){
+  const cell = document.getElementById('grid').children[i];
+  cell.classList.add('taken');
+  hideGhost(i);
+  const el = document.getElementById(player==='O'?`mo-${i}`:`mx-${i}`);
+  el.classList.add('show');
+}
+
+function findWin(){
+  for(let w=0;w<WINS.length;w++){
+    const [a,b,c]=WINS[w];
+    if(board[a]&&board[a]===board[b]&&board[a]===board[c])
+      return {combo:[a,b,c],idx:w};
+  }
+  return null;
+}
+
+function endGame(winner,winInfo){
+  over=true;
+  document.getElementById('aiDot').style.display='none';
+  if(winner){
+    scores[winner]++;
+    bumpScore(winner);
+    drawWinLine(winInfo.idx);
+    const msg=document.getElementById('resultMsg');
+    msg.textContent = winner==='O' ? 'Noughts win! 🎉' : 'Crosses win! 🎉';
+    msg.className = `result ${winner==='O'?'o-win':'x-win'}`;
+    const tr=document.getElementById('turnRow');
+    tr.className=`turn-row turn-end`;
+    document.getElementById('turnName').textContent=winner==='O'?'Noughts':'Crosses';
+    document.getElementById('turnSuffix').textContent=' wins!';
+  } else {
+    scores.D++;
+    bumpScore('D');
+    const msg=document.getElementById('resultMsg');
+    msg.textContent="It's a draw!";
+    msg.className='result draw';
+    document.getElementById('turnRow').className='turn-row';
+    document.getElementById('turnName').textContent='Draw';
+    document.getElementById('turnSuffix').textContent='';
+  }
+}
+
+// ── AI (Minimax) ─────────────────────────────────────────────────────────────
+function scheduleAI(){
+  document.getElementById('aiDot').style.display='inline-block';
+  setTimeout(()=>{
+    document.getElementById('aiDot').style.display='none';
+    if(!over) doMove(bestMove());
+  }, 500);
+}
+
+function bestMove(){
+  let best=-Infinity,move=-1;
+  board.forEach((_,i)=>{
+    if(!board[i]){
+      board[i]='X';
+      const s=minimax(board,0,false);
+      board[i]=null;
+      if(s>best){best=s;move=i;}
+    }
+  });
+  return move;
+}
+
+function minimax(b,d,isMax){
+  const w=winnerOf(b);
+  if(w==='X') return 10-d;
+  if(w==='O') return d-10;
+  if(b.every(c=>c)) return 0;
+  if(isMax){
+    let best=-Infinity;
+    b.forEach((_,i)=>{if(!b[i]){b[i]='X';best=Math.max(best,minimax(b,d+1,false));b[i]=null;}});
+    return best;
+  } else {
+    let best=Infinity;
+    b.forEach((_,i)=>{if(!b[i]){b[i]='O';best=Math.min(best,minimax(b,d+1,true));b[i]=null;}});
+    return best;
+  }
+}
+
+function winnerOf(b){
+  for(const[a,bb,c] of WINS) if(b[a]&&b[a]===b[bb]&&b[a]===b[c]) return b[a];
+  return null;
+}
+
+// ── UI ──────────────────────────────────────────────────────────────────────
+function updateTurn(){
+  const tr=document.getElementById('turnRow');
+  tr.className=`turn-row turn-${current.toLowerCase()}`;
+  document.getElementById('turnName').textContent=current==='O'?'Noughts':'Crosses';
+  document.getElementById('aiDot').style.display='none';
+  if(mode==='ai'&&current==='X'){
+    document.getElementById('turnSuffix').textContent=' thinking';
+    document.getElementById('aiDot').style.display='inline-block';
+  } else {
+    document.getElementById('turnSuffix').textContent="'s turn";
+  }
+}
+
+function bumpScore(who){
+  const id=who==='O'?'sO':who==='X'?'sX':'sD';
+  const el=document.getElementById(id);
+  el.textContent=scores[who];
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
+
+function drawWinLine(idx){
+  const [x1,y1,x2,y2]=LINE_COORDS[idx];
+  const size=document.getElementById('gridWrap').offsetWidth;
+  const s=size/300;
+  document.getElementById('winOverlay').innerHTML=`
+    <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+      <line x1="${x1*s}" y1="${y1*s}" x2="${x2*s}" y2="${y2*s}"/>
+    </svg>`;
+}
+
+// Chalk dust burst
+function spawnDust(idx){
+  const cell=document.getElementById('grid').children[idx];
+  const rect=cell.getBoundingClientRect();
+  const wrap=document.getElementById('gridWrap').getBoundingClientRect();
+  const cx=rect.left-wrap.left+rect.width/2;
+  const cy=rect.top-wrap.top+rect.height/2;
+  const div=document.createElement('div');
+  div.className='dust';
+  div.style.cssText=`left:${cx}px;top:${cy}px;`;
+  for(let i=0;i<10;i++){
+    const sp=document.createElement('span');
+    const angle=Math.random()*360;
+    const dist=20+Math.random()*30;
+    sp.style.cssText=`
+      --dx:${Math.cos(angle)*dist}px;
+      --dy:${Math.sin(angle)*dist}px;
+      animation-delay:${Math.random()*0.1}s;
+      width:${2+Math.random()*3}px;
+      height:${2+Math.random()*3}px;
+    `;
+    div.appendChild(sp);
+  }
+  document.getElementById('gridWrap').appendChild(div);
+  setTimeout(()=>div.remove(),800);
+}
+
+// ── Controls ─────────────────────────────────────────────────────────────────
+function nextRound(){
+  board=Array(9).fill(null);
+  over=false; current='O';
+  document.getElementById('resultMsg').textContent='';
+  document.getElementById('resultMsg').className='result';
+  document.getElementById('aiDot').style.display='none';
+  buildGrid();
+  updateTurn();
+}
+
+function resetAll(){
+  scores={O:0,X:0,D:0};
+  ['sO','sX','sD'].forEach(id=>document.getElementById(id).textContent='0');
+  nextRound();
+}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('btn2p').classList.toggle('active',m==='2p');
+  document.getElementById('btnAI').classList.toggle('active',m==='ai');
+  nextRound();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+buildGrid();
+updateTurn();
+</script>
+</body>
+</html>
