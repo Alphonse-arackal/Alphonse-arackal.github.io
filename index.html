@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Vault</title>
+<link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="app-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          <line x1="12" y1="6" x2="16" y2="6"/>
+          <line x1="12" y1="10" x2="16" y2="10"/>
+        </svg>
+      </div>
+      <span class="app-name">Study Vault</span>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <button class="btn-add-subject" id="addSubjectBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      New Subject
+    </button>
+  </div>
+
+  <nav class="subject-nav" id="subjectList">
+    <!-- Subjects rendered here -->
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="analytics-mini" id="analyticsMini">
+      <div class="mini-stat">
+        <span class="mini-stat-num" id="statSubjects">0</span>
+        <span class="mini-stat-label">Subjects</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-num" id="statResources">0</span>
+        <span class="mini-stat-label">Resources</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-num" id="statStreak">0</span>
+        <span class="mini-stat-label">Day Streak</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content" id="mainContent">
+
+  <!-- TOP HEADER -->
+  <header class="top-header" id="topHeader">
+    <div class="header-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="header-title-area">
+        <h1 class="subject-title" id="subjectTitle">Select a Subject</h1>
+        <span class="subject-subtitle" id="subjectSubtitle">Choose a subject from the sidebar to get started</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search resources...">
+        <div class="filter-pills" id="filterPills">
+          <button class="pill active" data-filter="all">All</button>
+          <button class="pill" data-filter="pdf">PDFs</button>
+          <button class="pill" data-filter="note">Notes</button>
+          <button class="pill" data-filter="video">Videos</button>
+          <button class="pill" data-filter="flashcard">Cards</button>
+        </div>
+      </div>
+      <button class="btn-add-resource" id="addResourceBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span class="btn-label">Add Resource</span>
+      </button>
+      <button class="btn-icon" id="darkModeBtn" title="Toggle Dark Mode">
+        <svg id="darkIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="plannerBtn" title="Study Planner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="analyticsBtn" title="Analytics">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MOBILE SEARCH BAR -->
+  <div class="mobile-search-bar">
+    <div class="search-wrapper">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="searchInputMobile" placeholder="Search resources...">
+    </div>
+  </div>
+
+  <!-- MOBILE FILTER BAR -->
+  <div class="mobile-filter-bar" id="mobileFilterBar">
+    <button class="pill active" data-filter="all">All</button>
+    <button class="pill" data-filter="pdf">PDFs</button>
+    <button class="pill" data-filter="note">Notes</button>
+    <button class="pill" data-filter="video">Videos</button>
+    <button class="pill" data-filter="flashcard">Cards</button>
+  </div>
+
+  <!-- WELCOME / EMPTY STATE -->
+  <div class="welcome-state" id="welcomeState">
+    <div class="welcome-content">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+      </div>
+      <h2>Welcome to Study Vault</h2>
+      <p>Your personal knowledge management system. Create subjects to organize your PDFs, notes, videos, and flashcards.</p>
+      <button class="btn-primary" onclick="document.getElementById('addSubjectBtn').click()">
+        Create Your First Subject
+      </button>
+    </div>
+  </div>
+
+  <!-- SUBJECT CONTENT -->
+  <div class="subject-content hidden" id="subjectContent">
+
+    <!-- ANALYTICS WIDGET -->
+    <div class="analytics-bar" id="analyticsBar">
+      <div class="analytics-card">
+        <div class="analytics-icon pdf-color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div>
+          <span class="analytics-num" id="aPdfs">0</span>
+          <span class="analytics-label">PDFs</span>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-icon note-color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="analytics-num" id="aNotes">0</span>
+          <span class="analytics-label">Notes</span>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-icon video-color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="23 7 16 12 23 17 23 7"/>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </div>
+        <div>
+          <span class="analytics-num" id="aVideos">0</span>
+          <span class="analytics-label">Videos</span>
+        </div>
+      </div>
+      <div class="analytics-card">
+        <div class="analytics-icon card-color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+        </div>
+        <div>
+          <span class="analytics-num" id="aCards">0</span>
+          <span class="analytics-label">Flashcards</span>
+        </div>
+      </div>
+      <div class="analytics-card streak-card">
+        <div class="analytics-icon streak-color">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="analytics-num" id="aStreak">0</span>
+          <span class="analytics-label">Day Streak</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF SECTION -->
+    <section class="resource-section" id="pdfSection" data-type="pdf">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-dot pdf-color"></div>
+          <h2>PDF Resources</h2>
+          <span class="count-badge" id="pdfCount">0</span>
+        </div>
+        <button class="btn-section-add" onclick="openAddModal('pdf')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add PDF
+        </button>
+      </div>
+      <div class="drop-zone" id="pdfDropZone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 16 12 12 8 16"/>
+          <line x1="12" y1="12" x2="12" y2="21"/>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+        <p>Drop PDF files here or <span>browse</span></p>
+        <input type="file" id="pdfFileInput" accept=".pdf" multiple style="display:none">
+      </div>
+      <div class="cards-grid" id="pdfGrid"></div>
+    </section>
+
+    <!-- NOTES SECTION -->
+    <section class="resource-section" id="noteSection" data-type="note">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-dot note-color"></div>
+          <h2>Important Notes</h2>
+          <span class="count-badge" id="noteCount">0</span>
+        </div>
+        <button class="btn-section-add" onclick="openAddModal('note')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Note
+        </button>
+      </div>
+      <div class="cards-grid" id="noteGrid"></div>
+    </section>
+
+    <!-- VIDEO SECTION -->
+    <section class="resource-section" id="videoSection" data-type="video">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-dot video-color"></div>
+          <h2>Video Lectures</h2>
+          <span class="count-badge" id="videoCount">0</span>
+        </div>
+        <button class="btn-section-add" onclick="openAddModal('video')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Video
+        </button>
+      </div>
+      <div class="cards-grid" id="videoGrid"></div>
+    </section>
+
+    <!-- FLASHCARD SECTION -->
+    <section class="resource-section" id="flashSection" data-type="flashcard">
+      <div class="section-header">
+        <div class="section-title">
+          <div class="section-dot card-color"></div>
+          <h2>Flashcards</h2>
+          <span class="count-badge" id="flashCount">0</span>
+        </div>
+        <div class="section-actions">
+          <button class="btn-practice" id="practiceBtn" onclick="openPracticeMode()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            Practice Mode
+          </button>
+          <button class="btn-section-add" onclick="openAddModal('flashcard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add Card
+          </button>
+        </div>
+      </div>
+      <div class="cards-grid flashcard-grid" id="flashGrid"></div>
+    </section>
+
+  </div>
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bottom-nav-btn active" id="bnHome" onclick="bnActivate('bnHome')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </button>
+    <button class="bottom-nav-btn" id="bnSearch" onclick="bnActivate('bnSearch');document.getElementById('searchInputMobile').focus()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </button>
+    <button class="bottom-nav-btn" id="bnSubjects" onclick="bnActivate('bnSubjects');document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('active')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Subjects
+    </button>
+    <button class="bottom-nav-btn" id="bnPlanner" onclick="bnActivate('bnPlanner');openPlannerModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Planner
+    </button>
+    <button class="bottom-nav-btn" id="bnAnalytics" onclick="bnActivate('bnAnalytics');openAnalyticsModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Stats
+    </button>
+  </nav>
+
+  <!-- FAB -->
+  <button class="fab" id="fab" onclick="openAddModal(activeResourceType)" title="Add Resource">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <line x1="12" y1="5" x2="12" y2="19"/>
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+</main>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- ADD SUBJECT MODAL -->
+<div class="modal-overlay" id="subjectModal">
+  <div class="modal glass-modal">
+    <div class="modal-header">
+      <h3>New Subject</h3>
+      <button class="modal-close" onclick="closeModal('subjectModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Subject Name</label>
+        <input type="text" id="subjectNameInput" placeholder="e.g. Computer Science" class="form-input">
+      </div>
+      <div class="form-group">
+        <label>Icon (Emoji)</label>
+        <div class="emoji-picker">
+          <span class="emoji-opt selected" data-emoji="📚">📚</span>
+          <span class="emoji-opt" data-emoji="🔬">🔬</span>
+          <span class="emoji-opt" data-emoji="💻">💻</span>
+          <span class="emoji-opt" data-emoji="🧮">🧮</span>
+          <span class="emoji-opt" data-emoji="🎨">🎨</span>
+          <span class="emoji-opt" data-emoji="🌍">🌍</span>
+          <span class="emoji-opt" data-emoji="⚡">⚡</span>
+          <span class="emoji-opt" data-emoji="🔐">🔐</span>
+          <span class="emoji-opt" data-emoji="🧬">🧬</span>
+          <span class="emoji-opt" data-emoji="📐">📐</span>
+        </div>
+        <input type="hidden" id="subjectEmojiInput" value="📚">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('subjectModal')">Cancel</button>
+      <button class="btn-primary" onclick="addSubject()">Create Subject</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD RESOURCE MODAL -->
+<div class="modal-overlay" id="resourceModal">
+  <div class="modal glass-modal">
+    <div class="modal-header">
+      <h3 id="resourceModalTitle">Add Resource</h3>
+      <button class="modal-close" onclick="closeModal('resourceModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="resource-type-tabs" id="resourceTypeTabs">
+        <button class="tab-btn active" data-type="pdf">📄 PDF</button>
+        <button class="tab-btn" data-type="note">📝 Note</button>
+        <button class="tab-btn" data-type="video">🎬 Video</button>
+        <button class="tab-btn" data-type="flashcard">🃏 Flashcard</button>
+      </div>
+
+      <!-- PDF Form -->
+      <div class="resource-form" id="formPdf">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="pdfTitle" placeholder="PDF title" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="pdfDesc" placeholder="Short description" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>PDF Link (URL)</label>
+          <input type="url" id="pdfUrl" placeholder="https://..." class="form-input">
+        </div>
+        <div class="form-divider"><span>or upload a file</span></div>
+        <div class="drop-zone mini" id="pdfDropZoneMini">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+          </svg>
+          <span>Drop or click to upload</span>
+          <input type="file" id="pdfFileInputModal" accept=".pdf" style="display:none">
+        </div>
+      </div>
+
+      <!-- Note Form -->
+      <div class="resource-form hidden" id="formNote">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="noteTitle" placeholder="Note title" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Content</label>
+          <textarea id="noteContent" placeholder="Write your notes here..." class="form-textarea" rows="8"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="noteTags" placeholder="e.g. important, review" class="form-input">
+        </div>
+      </div>
+
+      <!-- Video Form -->
+      <div class="resource-form hidden" id="formVideo">
+        <div class="form-group">
+          <label>Video Title</label>
+          <input type="text" id="videoTitle" placeholder="Lecture title" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>YouTube URL</label>
+          <input type="url" id="videoUrl" placeholder="https://youtube.com/watch?v=..." class="form-input">
+        </div>
+      </div>
+
+      <!-- Flashcard Form -->
+      <div class="resource-form hidden" id="formFlashcard">
+        <div class="form-group">
+          <label>Question (Front)</label>
+          <textarea id="cardQuestion" placeholder="Enter the question..." class="form-textarea" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Answer (Back)</label>
+          <textarea id="cardAnswer" placeholder="Enter the answer..." class="form-textarea" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Difficulty</label>
+          <div class="difficulty-select">
+            <button class="diff-btn active" data-diff="easy">🟢 Easy</button>
+            <button class="diff-btn" data-diff="medium">🟡 Medium</button>
+            <button class="diff-btn" data-diff="hard">🔴 Hard</button>
+          </div>
+          <input type="hidden" id="cardDiff" value="easy">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('resourceModal')">Cancel</button>
+      <button class="btn-primary" onclick="addResource()">Save Resource</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE VIEW MODAL -->
+<div class="modal-overlay" id="noteViewModal">
+  <div class="modal glass-modal modal-large">
+    <div class="modal-header">
+      <h3 id="noteViewTitle">Note</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-summarize" id="summarizeBtn" onclick="summarizeNote()">✨ Summarize</button>
+        <button class="modal-close" onclick="closeModal('noteViewModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="note-summary-box hidden" id="noteSummaryBox">
+        <div class="summary-header">
+          <span>✨ AI Summary</span>
+          <button onclick="document.getElementById('noteSummaryBox').classList.add('hidden')">×</button>
+        </div>
+        <p id="noteSummaryText"></p>
+      </div>
+      <div class="note-view-content" id="noteViewContent"></div>
+      <div class="note-tags-display" id="noteViewTags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT NOTE MODAL -->
+<div class="modal-overlay" id="editNoteModal">
+  <div class="modal glass-modal modal-large">
+    <div class="modal-header">
+      <h3>Edit Note</h3>
+      <button class="modal-close" onclick="closeModal('editNoteModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="editNoteTitle" class="form-input">
+      </div>
+      <div class="form-group">
+        <label>Content</label>
+        <textarea id="editNoteContent" class="form-textarea" rows="12"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tags</label>
+        <input type="text" id="editNoteTags" class="form-input">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('editNoteModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveEditNote()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO PLAYER MODAL -->
+<div class="modal-overlay" id="videoModal">
+  <div class="modal glass-modal modal-video">
+    <div class="modal-header">
+      <h3 id="videoModalTitle">Video</h3>
+      <button class="modal-close" onclick="closeVideoModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body video-modal-body">
+      <div class="video-container">
+        <iframe id="videoPlayer" src="" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRACTICE MODE MODAL -->
+<div class="modal-overlay" id="practiceModal">
+  <div class="modal glass-modal modal-practice">
+    <div class="modal-header">
+      <h3>Flashcard Practice</h3>
+      <button class="modal-close" onclick="closePracticeMode()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="practice-progress">
+        <div class="practice-progress-bar">
+          <div class="practice-progress-fill" id="practiceProgressFill"></div>
+        </div>
+        <span id="practiceProgressText">0 / 0</span>
+      </div>
+      <div class="practice-flashcard-container">
+        <div class="practice-flashcard" id="practiceCard" onclick="flipPracticeCard()">
+          <div class="pf-inner" id="pfInner">
+            <div class="pf-front">
+              <span class="pf-label">Question</span>
+              <p id="pfQuestion"></p>
+              <span class="pf-hint">Click to reveal answer</span>
+            </div>
+            <div class="pf-back">
+              <span class="pf-label">Answer</span>
+              <p id="pfAnswer"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="practice-controls" id="practiceControls" style="display:none">
+        <button class="diff-btn hard" onclick="ratePracticeCard('hard')">🔴 Hard</button>
+        <button class="diff-btn medium" onclick="ratePracticeCard('medium')">🟡 Medium</button>
+        <button class="diff-btn easy" onclick="ratePracticeCard('easy')">🟢 Easy</button>
+      </div>
+      <div class="practice-done hidden" id="practiceDone">
+        <div class="done-icon">🎉</div>
+        <h3>Session Complete!</h3>
+        <p id="practiceScore"></p>
+        <button class="btn-primary" onclick="closePracticeMode()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS MODAL -->
+<div class="modal-overlay" id="analyticsModal">
+  <div class="modal glass-modal modal-large">
+    <div class="modal-header">
+      <h3>📊 Study Analytics</h3>
+      <button class="modal-close" onclick="closeModal('analyticsModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" id="analyticsBody"></div>
+  </div>
+</div>
+
+<!-- PLANNER MODAL -->
+<div class="modal-overlay" id="plannerModal">
+  <div class="modal glass-modal modal-large">
+    <div class="modal-header">
+      <h3>📅 Study Planner</h3>
+      <button class="modal-close" onclick="closeModal('plannerModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="planner-add-form">
+        <h4>Schedule a Study Session</h4>
+        <div class="planner-form-row">
+          <div class="form-group">
+            <label>Subject</label>
+            <select id="plannerSubject" class="form-input"></select>
+          </div>
+          <div class="form-group">
+            <label>Topic</label>
+            <input type="text" id="plannerTopic" placeholder="e.g. Recursion" class="form-input">
+          </div>
+        </div>
+        <div class="planner-form-row">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="plannerDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <input type="time" id="plannerTime" class="form-input">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addPlannerSession()">Schedule Session</button>
+      </div>
+      <div class="planner-sessions" id="plannerSessions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
